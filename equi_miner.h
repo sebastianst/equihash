@@ -104,7 +104,7 @@ typedef u32 au32;
 // by default buckets have a capacity of twice their expected size
 // but this factor reduced it accordingly
 #ifndef SAVEMEM
-#if RESTBITS == 4
+#if RESTBITS == 4 || RESTBITS == 0
 // can't save memory in such small buckets
 #define SAVEMEM 1
 #elif RESTBITS >= 8
@@ -505,6 +505,8 @@ struct equi {
       return (slot->bytes[prevbo] & 0x3f) << 4 | slot->bytes[prevbo+1] >> 4;
 #elif WN == 144 && RESTBITS == 4
       return slot->bytes[prevbo] & 0xf;
+#elif WN == 48 && RESTBITS == 0
+      return slot->bytes[prevbo] & 0xf; // TODO Correct?
 #else
 #error non implemented
 #endif
@@ -519,6 +521,8 @@ struct equi {
       return (slot->bytes[prevbo] & 0x3) << 8 | slot->bytes[prevbo+1];
 #elif WN == 144 && RESTBITS == 4
       return slot->bytes[prevbo] & 0xf;
+#elif WN == 48 && RESTBITS == 0
+      return slot->bytes[prevbo] & 0xf; // TODO Correct?
 #else
 #error non implemented
 #endif
@@ -639,6 +643,8 @@ static const u32 NBLOCKS = (NHASHES+HASHESPERBLOCK-1)/HASHESPERBLOCK;
           const u32 bucketid = ((u32)ph[0] << 8) | ph[1];
 #elif BUCKBITS == 20 && RESTBITS == 4
           const u32 bucketid = ((((u32)ph[0] << 8) | ph[1]) << 4) | ph[2] >> 4;
+#elif BUCKBITS == 8 && RESTBITS == 0
+          const u32 bucketid = (u32)ph[0] // TODO Correct?
 #else
 #error not implemented
 #endif
@@ -692,6 +698,8 @@ static const u32 NBLOCKS = (NHASHES+HASHESPERBLOCK-1)/HASHESPERBLOCK;
 #elif WN == 96 && BUCKBITS == 12 && RESTBITS == 4
           xorbucketid = ((u32)(bytes0[htl.prevbo+1] ^ bytes1[htl.prevbo+1]) << 4)
                             | (bytes0[htl.prevbo+2] ^ bytes1[htl.prevbo+2]) >> 4;
+#elif WN == 48 && BUCKBITS == 8 && RESTBITS == 0
+          xorbucketid = (u32)0 // TODO I have no idea
 #else
 #error not implemented
 #endif
@@ -745,6 +753,8 @@ static const u32 NBLOCKS = (NHASHES+HASHESPERBLOCK-1)/HASHESPERBLOCK;
 #elif WN == 96 && BUCKBITS == 12 && RESTBITS == 4
           xorbucketid = ((u32)(bytes0[htl.prevbo+1] ^ bytes1[htl.prevbo+1]) << 4)
                             | (bytes0[htl.prevbo+2] ^ bytes1[htl.prevbo+2]) >> 4;
+#elif WN == 48 && BUCKBITS == 8 && RESTBITS == 0
+          xorbucketid = (u32)0 // TODO I have no idea
 #else
 #error not implemented
 #endif
